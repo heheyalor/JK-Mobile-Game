@@ -1,0 +1,2194 @@
+<!DOCTYPE html>
+<html lang="en"><head><script data-bard-client-injected="true">(function(firebaseConfig, initialAuthToken, appId) {
+        window.__firebase_config = firebaseConfig;
+        window.__initial_auth_token = initialAuthToken;
+        window.__app_id = appId;
+            })("\n{\n  \"apiKey\": \"AIzaSyCqyCcs2R2e7AegGjvFAwG98wlamtbHvZY\",\n  \"authDomain\": \"bard-frontend.firebaseapp.com\",\n  \"projectId\": \"bard-frontend\",\n  \"storageBucket\": \"bard-frontend.firebasestorage.app\",\n  \"messagingSenderId\": \"175205271074\",\n  \"appId\": \"1:175205271074:web:2b7bd4d34d33bf38e6ec7b\"\n}\n","eyJhbGciOiJSUzI1NiIsImtpZCI6IjExNjRiNzdiNDMzZDdhMDAyMWI4NjE4YjhjYTU3ZTMyZGI5MWUxMTMiLCJ0eXAiOiJKV1QifQ.eyJzdWIiOiJmaXJlYmFzZS1hZG1pbnNkay1mYnN2Y0BiYXJkLWZyb250ZW5kLmlhbS5nc2VydmljZWFjY291bnQuY29tIiwiYXVkIjoiaHR0cHM6Ly9pZGVudGl0eXRvb2xraXQuZ29vZ2xlYXBpcy5jb20vZ29vZ2xlLmlkZW50aXR5LmlkZW50aXR5dG9vbGtpdC52MS5JZGVudGl0eVRvb2xraXQiLCJ1aWQiOiIxNzYyMTU5OTMwMTU5MDc5MDExNSIsImlzcyI6ImZpcmViYXNlLWFkbWluc2RrLWZic3ZjQGJhcmQtZnJvbnRlbmQuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCJjbGFpbXMiOnsiYXBwSWQiOiJjXzQxYjhiNjBhY2Y4M2IzNTRfaW5kZXguaHRtbC0xMjkifSwiZXhwIjoxNzkzNDcwMDU3LCJpYXQiOjE3OTM0NjY0NTcsImFsZyI6IlJTMjU2In0.Jx5xFR9JkqvOLtT83vhNZepRjV5ftzGWtkCr926Ldzsh4OGINsl5APt_7090OHKQYuyGY7O0c0VlfaPnQBNl68SCX6s02TgQP6ioPDomOZNQLlT8tJTTtHEcc8ibI160RfvMNNR3CVbP_Fm_cY0y2zZ18QgTY8Bn8k1zI1iui-lt7i0lKHqVEQqwd8wUJqnfkMsCynq6ObqX0bSJXTL4Z_P4765UeIjBLtEuh1xTq6XY3MbsJ8S9zQUa05NPl3lbjpc3GuVYv2xOq8Khz1HXZm6U11_Wx-x2fvNtfnmyiE-JpGEIp1qjQdAUPkbZ1Zozwb4oSB9Wu6ckdb2Gl7Me5g","c_41b8b60acf83b354_index.html-129")</script><script data-bard-client-injected="true">
+  document.addEventListener('input', (event) => {
+    if (event.target && (event.target.isContentEditable || event.target.hasAttribute('contenteditable'))) {
+      const clonedDoc = document.cloneNode(true);
+      const injectedScripts = clonedDoc.querySelectorAll('[data-bard-client-injected="true"]');
+      injectedScripts.forEach(el => el.remove());
+      window.parent.postMessage({
+        type: 'inlineEdit',
+        html: '<!DOCTYPE html>\n' + clonedDoc.documentElement.outerHTML
+      }, '*');
+    }
+  });
+</script><script data-bard-client-injected="true">(function(){'use strict';window.addEventListener("message",a=>{a.data&&a.data.type==="SUPPLEMENTAL_DATA_UPDATE"&&window.dispatchEvent(new CustomEvent("supplementaldataupdate",{detail:a.data.data}))});}).call(this);
+</script><script data-bard-client-injected="true">(function() {
+  const SCROLL_KEYS = new Set([
+    'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
+    ' ', 'Spacebar', 'PageUp', 'PageDown', 'Home', 'End',
+  ]);
+  const HORIZONTAL_KEYS = new Set(['ArrowLeft', 'ArrowRight']);
+
+  function isTextEntryTarget(target) {
+    if (!target) return false;
+    const tagName = target.tagName;
+    return tagName === 'INPUT' || tagName === 'TEXTAREA' ||
+        tagName === 'SELECT' || target.isContentEditable === true;
+  }
+
+  // An element absorbs the key only if it both overflows on the axis being
+  // scrolled and is configured to scroll on that axis. The cheap dimension
+  // test runs first because getComputedStyle forces a style recalc, and this
+  // runs on every keypress. Each axis is read from its own longhand: the
+  // 'overflow' shorthand serializes as two values when the axes differ, which
+  // is the common 'overflow-x: hidden; overflow-y: auto' pane.
+  function canScroll(node, horizontal) {
+    const overflows = horizontal ? node.scrollWidth > node.clientWidth
+                                 : node.scrollHeight > node.clientHeight;
+    if (!overflows) return false;
+    const style = window.getComputedStyle(node);
+    const overflow = horizontal ? style.overflowX : style.overflowY;
+    return overflow === 'auto' || overflow === 'scroll';
+  }
+
+  // Walks up from the event target so nested scrollers keep their behavior.
+  // <body> is included because pages that pin the root height make it the
+  // scroll container.
+  function hasScrollableAncestor(target, horizontal) {
+    let node = target;
+    while (node && node !== document.documentElement) {
+      if (canScroll(node, horizontal)) return true;
+      node = node.parentElement;
+    }
+    return false;
+  }
+
+  function rootCanScroll(horizontal) {
+    const scroller = document.scrollingElement || document.documentElement;
+    if (!scroller) return false;
+    // Tolerate a pixel of rounding so subpixel layouts do not look scrollable.
+    return horizontal ? scroller.scrollWidth > window.innerWidth + 1
+                      : scroller.scrollHeight > window.innerHeight + 1;
+  }
+
+  window.addEventListener('keydown', function(event) {
+    if (!SCROLL_KEYS.has(event.key)) return;
+    if (event.defaultPrevented) return;
+    // Alt and Meta turn arrows into browser history navigation, and Ctrl is
+    // reserved for shortcuts, so none of them are scroll intent.
+    if (event.altKey || event.metaKey || event.ctrlKey) return;
+
+    const target = event.target;
+    if (isTextEntryTarget(target)) return;
+
+    // Anything that can still absorb the scroll gets to keep it.
+    const horizontal = HORIZONTAL_KEYS.has(event.key);
+    if (rootCanScroll(horizontal)) return;
+    if (hasScrollableAncestor(target, horizontal)) return;
+
+    event.preventDefault();
+  }, {capture: true, passive: false});
+})();</script><script data-bard-client-injected="true">(function() {
+  // Ensure this script is executed only once
+  if (window.firebaseAuthBridgeScriptLoaded) {
+    return;
+  }
+  window.firebaseAuthBridgeScriptLoaded = true;
+
+  let nextTokenPromiseId = 0;
+
+  // Stores { resolve, reject } for ongoing token requests
+  const pendingTokenPromises = {};
+
+  // Listen for messages from the Host Application
+  window.addEventListener('message', function(event) {
+
+    const messageData = event.data;
+
+  if (messageData && messageData.type === 'RESOLVE_NEW_FIREBASE_TOKEN') {
+      const { success, token, error, promiseId } = messageData ?? {};
+      if (pendingTokenPromises[promiseId]) {
+        if (success) {
+          pendingTokenPromises[promiseId].resolve(token);
+        } else {
+          pendingTokenPromises[promiseId].reject(new Error(error || 'Token refresh failed from host.'));
+        }
+        delete pendingTokenPromises[promiseId];
+      }
+    }
+  });
+
+  // Expose a function for the Generated App to request a new Firebase token
+  window.requestNewFirebaseToken = function() {
+    const currentPromiseId = nextTokenPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingTokenPromises[currentPromiseId] = { resolve, reject };
+    });
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({
+        type: 'REQUEST_NEW_FIREBASE_TOKEN',
+        promiseId: currentPromiseId
+      }, '*');
+    } else {
+      pendingTokenPromises[currentPromiseId].reject(new Error('No parent window to request token from.'));
+      delete pendingTokenPromises[currentPromiseId];
+    }
+    return promise;
+  };
+})();</script><script data-bard-client-injected="true">
+let realOriginalGetUserMedia = null;
+if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+  realOriginalGetUserMedia = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
+}
+
+(function() {
+  if (navigator.mediaDevices && navigator.mediaDevices.__proto__) {
+    try {
+      Object.defineProperty(navigator.mediaDevices.__proto__, 'getUserMedia', {
+        get: function() {
+          return undefined; // Or throw an error
+        },
+        configurable: false
+      });
+    } catch (error) {
+      console.error("Error defining prototype getter:", error);
+    }
+  }
+})();
+
+(function() {
+  const pendingMediaResolvers = {};
+  let nextMediaPromiseId = 0;
+
+  function requestMediaPermissions(constraints) {
+    const mediaPromiseId = nextMediaPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingMediaResolvers[mediaPromiseId] = (granted) => {
+        delete pendingMediaResolvers[mediaPromiseId];
+        resolve(granted);
+      };
+    });
+
+    window.parent.postMessage({
+      type: 'requestMediaPermission',
+      constraints: constraints,
+      promiseId: mediaPromiseId,
+    }, '*');
+
+    return promise;
+  }
+
+  let originalGetUserMedia = realOriginalGetUserMedia;
+
+  function interceptGetUserMedia() {
+    if (navigator.mediaDevices) {
+      Object.defineProperty(navigator.mediaDevices, 'getUserMedia', {
+        value: function(constraints) {
+          return requestMediaPermissions(constraints).then((granted) => {
+            if (granted) {
+              if (originalGetUserMedia) {
+                return originalGetUserMedia(constraints);
+              } else {
+                throw new Error("Original getUserMedia not available.");
+              }
+            } else {
+              throw new DOMException('Permission denied', 'NotAllowedError');
+            }
+          });
+        },
+        writable: false,
+        configurable: false
+      });
+    }
+  }
+
+  interceptGetUserMedia();
+
+  const observer = new MutationObserver(function(mutationsList, observer) {
+    for (const mutation of mutationsList) {
+      if (mutation.type === 'reconfigured' && mutation.name === 'getUserMedia' && mutation.object === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'attributes' && mutation.attributeName === 'getUserMedia' && mutation.target === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'childList' && mutation.addedNodes) {
+        mutation.addedNodes.forEach(node => {
+          if (node === navigator.mediaDevices) {
+            interceptGetUserMedia();
+          }
+        });
+      }
+    }
+  });
+
+  function interceptSpeechRecognition() {
+    if (!window.SpeechRecognition && !window.webkitSpeechRecognition) {
+      return;
+    }
+
+    const OriginalSpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    const SpeechRecognitionWrapper = function(...args) {
+      const recognizer = new OriginalSpeechRecognition(...args);
+      const originalStart = recognizer.start.bind(recognizer);
+
+      recognizer.start = function() {
+        requestMediaPermissions({ audio: true }).then(granted => {
+          if (granted) {
+            originalStart();
+          } else {
+            const errorEvent = new SpeechRecognitionErrorEvent('error');
+            errorEvent.error = 'not-allowed'; // This is the standard error for permission denial.
+            recognizer.dispatchEvent(errorEvent);
+          }
+        });
+      };
+
+      return recognizer;
+    };
+
+    SpeechRecognitionWrapper.prototype = OriginalSpeechRecognition.prototype;
+    SpeechRecognitionWrapper.prototype.constructor = SpeechRecognitionWrapper;
+
+    if (window.SpeechRecognition) {
+      window.SpeechRecognition = SpeechRecognitionWrapper;
+    }
+    if (window.webkitSpeechRecognition) {
+      window.webkitSpeechRecognition = SpeechRecognitionWrapper;
+    }
+  }
+
+  interceptSpeechRecognition();
+
+  window.addEventListener('message', function(event) {
+    if (event.data) {
+      if (event.data.type === 'resolveMediaPermission') {
+        const { promiseId, granted } = event.data;
+        if (pendingMediaResolvers[promiseId]) {
+          pendingMediaResolvers[promiseId](granted);
+        }
+      }
+    }
+  });
+
+})();</script><script ws-interception-config="{&quot;parentOrigin&quot;:&quot;https://gemini.google.com&quot;,&quot;proxiedDomains&quot;:[]}" data-bard-client-injected="true">(function(){'use strict';var u=typeof Object.defineProperties=="function"?Object.defineProperty:function(b,d,e){if(b==Array.prototype||b==Object.prototype)return b;b[d]=e.value;return b};function v(b){b=["object"==typeof globalThis&&globalThis,b,"object"==typeof window&&window,"object"==typeof self&&self,"object"==typeof global&&global];for(var d=0;d<b.length;++d){var e=b[d];if(e&&e.Math==Math)return e}throw Error("Cannot find global object");}var w=v(this);
+function y(b,d){if(d)a:{var e=w;b=b.split(".");for(var h=0;h<b.length-1;h++){var k=b[h];if(!(k in e))break a;e=e[k]}b=b[b.length-1];h=e[b];d=d(h);d!=h&&d!=null&&u(e,b,{configurable:!0,writable:!0,value:d})}}function z(b){function d(h){return b.next(h)}function e(h){return b.throw(h)}return new Promise(function(h,k){function m(n){n.done?h(n.value):Promise.resolve(n.value).then(d,e).then(m,k)}m(b.next())})}y("globalThis",function(b){return b||w});/*
+
+ Copyright The Closure Library Authors.
+ SPDX-License-Identifier: Apache-2.0
+*/
+function A(b,d){function e(){}e.prototype=d.prototype;b.j=d.prototype;b.prototype=new e;b.prototype.constructor=b;b.h=function(h,k,m){for(var n=Array(arguments.length-2),p=2;p<arguments.length;p++)n[p-2]=arguments[p];return d.prototype[k].apply(h,n)}};function B(b,d,e="*"){function h(a){if(typeof a==="string")return F.encode(a).buffer;if(a instanceof ArrayBuffer)return a.slice(0);if(ArrayBuffer.isView(a))return a.buffer.slice(a.byteOffset,a.byteOffset+a.byteLength);throw Error("Invalid data type");}function k(a){a=h(a);var f={type:"send",data:new Uint8Array(a)},g;(g=r)==null||g.postMessage(f,[a])}function m(){if(!r)throw Error("Data port not captured yet.");r.onmessage=a=>{if(a.data.type==="message"){a=new MessageEvent("message",{data:G.decode(a.data.data)});
+let f;(f=c.onmessage)==null||f.call(c,a);c.dispatchEvent(a)}}}function n(){if(!t)throw Error("Control port not captured yet.");t.onmessage=a=>{switch(a.data.type){case "open":l=1;var f=new Event("open"),g;(g=c.onopen)==null||g.call(c,f);c.dispatchEvent(f);q.forEach(H=>{k(H)});q=[];break;case "close":g=a.data;l=3;g=new CloseEvent("close",{code:g.code,reason:g.reason,wasClean:g.wasClean});(f=c.onclose)==null||f.call(c,g);c.dispatchEvent(g);break;case "error":l=3;f=new Event("error");let x;(x=c.onerror)==
+null||x.call(c,f);c.dispatchEvent(f)}}}function p(a){return z(function*(){var f=new MessageChannel;t=f.port1;var g=new MessageChannel;r=g.port1;n();m();window.parent.postMessage({type:"websocket_open",portOrdering:["control","data"],url:b,protocols:a||[],connectionId:I},e,[f.port2,g.port2])}())}var c=Reflect.construct(EventTarget,[],new.target);c.CONNECTING=0;c.OPEN=1;c.CLOSING=2;c.CLOSED=3;c.url=b;c.binaryType="arraybuffer";c.protocol="";c.i="";var l=0,t=null,r=null,q=[],F=new TextEncoder,G=new TextDecoder;
+c.onopen=null;c.onmessage=null;c.onclose=null;c.onerror=null;Object.defineProperty(c,"readyState",{get:()=>l,enumerable:!0,configurable:!0});Object.defineProperty(c,"bufferedAmount",{get:()=>{var a=0;q.forEach(f=>{a+=typeof f==="string"?f.length:f.byteLength});return a},enumerable:!0,configurable:!0});var I=function(){var a;return((a=globalThis.crypto)==null?0:a.randomUUID)?globalThis.crypto.randomUUID():"xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,f=>{var g=Math.random()*16|0;return(f===
+"x"?g:g&3|8).toString(16)})}();c.send=a=>{if(l===1)a instanceof Blob?a.arrayBuffer().then(f=>{k(f)}):k(a);else if(l===0)if(typeof a==="string")q.push(a);else if(a instanceof ArrayBuffer||ArrayBuffer.isView(a))q.push(h(a));else throw Error("Sending Blob is not supported before the connection is open.");else console.debug("WebSocket send called in CLOSING or CLOSED state; ignored.")};c.close=(a=1E3,f="")=>{if(l!==2&&l!==3){l=2;a={type:"close",code:a,reason:f,wasClean:a===1E3};var g;(g=t)==null||g.postMessage(a)}};
+Promise.resolve().then(()=>p(d));return c}A(B,EventTarget);var C=document.currentScript,D=C==null?void 0:C.getAttribute("ws-interception-config");if(!D)throw Error("WebSocket Interceptor: Missing ws-interception-config attribute in the script tag.");var E=JSON.parse(D);if(!E.parentOrigin||typeof E.parentOrigin!=="string")throw Error("WebSocket Interceptor: Invalid parentOrigin in ws-interception-config");
+(function(b){var d=Object.getOwnPropertyDescriptor(window,"WebSocket");if(!d||d.writable||d.configurable)d=Object.assign(function(e,h){try{let k=(new URL(e)).hostname;if(b.proxiedDomains.some(m=>k===m||k.endsWith(`.${m}`)))return new B(e,h,b.parentOrigin)}catch(k){throw window.parent.postMessage({type:"websocket_blocked",url:e,reason:"blocked_invalid_url"},b.parentOrigin),new DOMException(`WebSocket connection to '${e}' is not allowed in Canvas.`,"SecurityError");}window.parent.postMessage({type:"websocket_blocked",
+url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMException(`WebSocket connection to '${e}' is not allowed in Canvas.`,"SecurityError");},{CONNECTING:0,OPEN:1,CLOSING:2,CLOSED:3}),Object.defineProperty(window,"WebSocket",{value:d,writable:!1,configurable:!1})})({proxiedDomains:E.proxiedDomains||[],parentOrigin:E.parentOrigin});}).call(this);
+</script><script data-bard-client-injected="true">((function(modelInformation) {
+  const originalFetch = window.fetch;
+  // TODO: b/421908508 - Move these out of the script and match all generative AI model calls.
+  let googleLlmBaseApiUrls = [
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':streamGenerateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageEditModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageTransformModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.ttsModelName + ':generateContent',
+  ];
+  modelInformation.deprecatedTextModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+    );
+  });
+  modelInformation.deprecatedImageModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':predict',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':predictLongRunning',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+  modelInformation.deprecatedGenerateImageModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+  modelInformation.deprecatedImageTransformModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+
+  const pendingFetchResolvers = {};
+  let nextPromiseId = 0;
+
+  function handleStringInput(input, optionsArgument) {
+    const actualUrl = input;
+    const fetchCallArgs = [actualUrl, optionsArgument];
+    const effectiveOptions = optionsArgument || {};
+    const bodyForApiKeyCheck = effectiveOptions.body;
+    const bodyForPostMessage = effectiveOptions.body;
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  function handleRequestInput(input, optionsArgument) {
+    const actualUrl = input.url;
+    const fetchCallArgs = [input, optionsArgument];
+    const effectiveOptions = { method: input.method, headers: new Headers(input.headers) };
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (optionsArgument) {
+      if (optionsArgument.method) effectiveOptions.method = optionsArgument.method;
+      if (optionsArgument.headers) effectiveOptions.headers = new Headers(optionsArgument.headers);
+      if ('body' in optionsArgument) {
+        bodyForApiKeyCheck = optionsArgument.body;
+        bodyForPostMessage = optionsArgument.body;
+      } else {
+        bodyForApiKeyCheck = undefined;
+        bodyForPostMessage = input.body;
+      }
+    } else {
+      bodyForApiKeyCheck = undefined;
+      bodyForPostMessage = input.body;
+    }
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  window.fetch = function(input, optionsArgument) {
+    let actualUrl;
+    let fetchCallArgs;
+    let effectiveOptions = {};
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (typeof input === 'string') {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleStringInput(input, optionsArgument));
+    } else if (input instanceof Request) {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleRequestInput(input, optionsArgument));
+    } else {
+      return originalFetch.apply(window, [input, optionsArgument]);
+    }
+
+    effectiveOptions.method = effectiveOptions.method || 'GET';
+    if (!effectiveOptions.headers) {
+      effectiveOptions.headers = new Headers();
+    }
+
+
+    if (typeof actualUrl === 'string' && googleLlmBaseApiUrls.some((url) => actualUrl.startsWith(url))) {
+      let apiKeyIsNull = true;
+
+      const regex = new RegExp("models/([^:]+)");
+      const modelNameMatch = actualUrl.match(regex);
+      const modelName = modelNameMatch ? modelNameMatch[1] : 'unspecified';
+
+
+      try {
+        const urlObject = new URL(actualUrl);  // Use URL object for robust parsing
+        const apiKeyParam = urlObject.searchParams.get('key');
+        if (apiKeyParam) {
+          apiKeyIsNull = false;
+        }
+      } catch (e) {
+        // Continue checks even if URL parsing fails
+      }
+
+      if (apiKeyIsNull && effectiveOptions.headers) {
+        const h = new Headers(effectiveOptions.headers);
+        const apiKeyHeaderValue = h.get('X-API-Key') || h.get('x-api-key');
+        if (apiKeyHeaderValue) {
+          apiKeyIsNull = false;
+          return originalFetch.apply(window, fetchCallArgs);
+        }
+      }
+
+      if (apiKeyIsNull && effectiveOptions.method && ['POST', 'PUT', 'PATCH'].includes(effectiveOptions.method.toUpperCase()) && typeof bodyForApiKeyCheck === 'string') {
+        try {
+          const bodyData = JSON.parse(bodyForApiKeyCheck);
+          if (bodyData && bodyData.apiKey) {
+            apiKeyIsNull = false;
+            return originalFetch.apply(window, fetchCallArgs);
+          }
+        } catch (e) {
+          // Ignore JSON parsing errors
+        }
+      }
+
+      if(apiKeyIsNull) {
+        const promiseId = nextPromiseId++;
+        const promise = new Promise((resolve) => {
+          pendingFetchResolvers[promiseId] = (resolvedResponse) => {
+            delete pendingFetchResolvers[promiseId];
+            resolve(resolvedResponse);
+          };
+        });
+
+        let serializedBodyForPostMessage;
+        if (typeof bodyForPostMessage === 'string' || bodyForPostMessage == null) {
+            serializedBodyForPostMessage = bodyForPostMessage;
+        } else if (bodyForPostMessage instanceof ReadableStream) {
+            serializedBodyForPostMessage = null;
+        } else {
+            try {
+                serializedBodyForPostMessage = JSON.stringify(bodyForPostMessage);
+            } catch (e) {
+                serializedBodyForPostMessage = null;
+            }
+        }
+
+        const messageOptions = {
+            method: effectiveOptions.method,
+            headers: Object.fromEntries(new Headers(effectiveOptions.headers).entries()),
+            body: serializedBodyForPostMessage
+        };
+
+        window.parent.postMessage({
+          type: 'requestFetch',
+          url: actualUrl,
+          modelName: modelName,
+          options: messageOptions,
+          promiseId: promiseId,
+        }, '*');
+
+        return promise;
+      }
+      return originalFetch.apply(window, fetchCallArgs);
+    }
+    return originalFetch.apply(window, fetchCallArgs);
+  };
+
+  window.addEventListener('message', function(event) {
+    if (event.data && event.data.type === 'resolveFetch') {
+      const { promiseId, response } = event.data;
+      if (pendingFetchResolvers[promiseId]) {
+        try {
+          const reconstructedResponse = new Response(response.body, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: new Headers(response.headers),
+          });
+          pendingFetchResolvers[promiseId](reconstructedResponse);
+        } catch (error) {
+          pendingFetchResolvers[promiseId](new Response(null, { status: 500, statusText: "Interceptor Response Reconstruction Error" }));
+        }
+      }
+    }
+  });
+
+}))({"textModelName":"gemini-3-flash-preview","imageModelName":"imagen-4.0-generate-001","imageEditModelName":"gemini-3.1-flash-image","imageTransformModelName":"gemini-3-pro-image","videoModelName":"veo-2.0-generate-001","ttsModelName":"gemini-2.5-flash-preview-tts","deprecatedTextModelNames":["gemini-2.0-flash","gemini-2.5-flash","gemini-2.5-flash-preview-04-17","gemini-2.5-flash-preview-05-20","gemini-2.5-flash-preview-09-2025"],"deprecatedImageModelNames":["imagen-3.0-generate-001","imagen-3.0-generate-002"],"deprecatedGenerateImageModelNames":["gemini-2.5-flash-image-preview","gemini-2.5-flash-image","gemini-3.1-flash-image-preview"],"deprecatedImageTransformModelNames":["gemini-3-pro-image-preview-11-2025"]})</script><script data-bard-client-injected="true">(function() {
+  function normalizeSlug(str) {
+    try {
+      return str
+        .trim()
+        .toLowerCase()
+        .replace(/[^p{L}p{N}s_-]/gu, '')
+        .replace(/s+/g, '-');
+    } catch (e) {
+      return str
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9s_-]/g, '')
+        .replace(/s+/g, '-');
+    }
+  }
+
+  function findTargetElement(hash) {
+    if (!hash || hash === '#') {
+      return null;
+    }
+    const rawId = hash.startsWith('#') ? hash.slice(1) : hash;
+    let decodedId = rawId;
+    try {
+      decodedId = decodeURIComponent(rawId);
+    } catch (e) {
+      // Ignore URI malformed errors.
+    }
+
+    // 1. Direct ID match (raw and decoded).
+    let target = document.getElementById(rawId) || document.getElementById(decodedId);
+    if (target) {
+      return target;
+    }
+
+    // 2. Name attribute match (<a name="...">).
+    try {
+      if (typeof CSS !== 'undefined' && CSS.escape) {
+        target =
+          document.querySelector('[name="' + CSS.escape(rawId) + '"]') ||
+          document.querySelector('[name="' + CSS.escape(decodedId) + '"]');
+      } else {
+        const namedElements = document.getElementsByName(rawId);
+        if (namedElements && namedElements.length > 0) {
+          return namedElements[0];
+        }
+      }
+    } catch (e) {
+      // Ignore querySelector syntax errors.
+    }
+    if (target) {
+      return target;
+    }
+
+    // 3. Match heading text by slug (for Markdown TOCs where headings lack explicit IDs).
+    const targetSlug = normalizeSlug(decodedId);
+    if (targetSlug) {
+      for (const heading of document.querySelectorAll('h1, h2, h3, h4, h5, h6')) {
+        if (normalizeSlug(heading.textContent || '') === targetSlug) {
+          return heading;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  document.addEventListener('click', function(event) {
+    const target = event.target;
+    const anchor = target && typeof target.closest === 'function' ? target.closest('a') : null;
+    if (!anchor) {
+      return;
+    }
+
+    const href = anchor.getAttribute('href');
+    if (
+      !href ||
+      href.trim().toLowerCase().startsWith('javascript:') ||
+      anchor.hasAttribute('download')
+    ) {
+      return;
+    }
+
+    // Check if the link is an in-page hash / anchor link.
+    if (href.startsWith('#')) {
+      event.preventDefault();
+      const targetElement = findTargetElement(href);
+      if (targetElement) {
+        targetElement.scrollIntoView({behavior: 'smooth', block: 'start'});
+      }
+      return;
+    }
+
+    // Check if the URL has the same origin/pathname but with a hash.
+    try {
+      const url = new URL(anchor.href, window.location.href);
+      if (
+        url.hash &&
+        url.origin === window.location.origin &&
+        url.pathname === window.location.pathname
+      ) {
+        event.preventDefault();
+        const targetElement = findTargetElement(url.hash);
+        if (targetElement) {
+          targetElement.scrollIntoView({behavior: 'smooth', block: 'start'});
+        }
+        return;
+      }
+    } catch (e) {
+      // Fall through if URL parsing fails.
+    }
+
+    // For all external or full navigation links, prevent iframe-level navigation
+    // (which breaks in AGSA WebView or sandboxed iframes) and ensure they open
+    // safely in a new tab/window.
+    if (anchor.target !== '_blank') {
+      event.preventDefault();
+      window.open(anchor.href, '_blank', 'noopener,noreferrer');
+    }
+  }, {capture: true});
+})();</script><script data-bard-client-injected="true">(function(){'use strict';function a(){window.parent.postMessage({type:"interaction"},"*")}window.addEventListener("click",a,{capture:!0,passive:!0});window.addEventListener("touchstart",a,{capture:!0,passive:!0});window.addEventListener("keydown",a,{capture:!0,passive:!0});}).call(this);
+</script><script data-bard-client-injected="true">(function() {
+  const originalConsoleLog = console.log;
+  const originalConsoleError = console.error;
+
+    /**
+   * Normalizes an error event or a promise rejection reason into a structured error object.
+   * @param {*} errorEventOrReason The error object or reason.
+   * @return {object} Structured error data { message, name, stack }.
+   */
+  function getErrorObject(errorEventOrReason) {
+    if (errorEventOrReason instanceof Error) {
+      return {
+        message: errorEventOrReason.message,
+        name: errorEventOrReason.name,
+        stack: errorEventOrReason.stack,
+      };
+    }
+    // Fallback for non-Error objects.
+    try {
+      return {
+        message: JSON.stringify(errorEventOrReason),
+        name: 'UnknownErrorType',
+        stack: null,
+      };
+    } catch (e) {
+      return {
+        message: String(errorEventOrReason),
+        name: 'UnknownErrorTypeNonStringifiable',
+        stack: null,
+      };
+    }
+  }
+
+  /**
+   * Converts an array of arguments (from log/error) into a single string.
+   * Handles Error objects specially to include their message and stack.
+   * @param {Array<*>} args - Arguments passed to console methods.
+   * @return {string} A string representation of the arguments.
+   */
+  function stringifyArgs(args) {
+    return args
+      .map((arg) => {
+        if (arg instanceof Error) {
+          const {message, stack} = arg;
+          return `Error: ${message}${stack ? ('\nStack: ' + stack) : ''}`;
+        }
+        if (typeof arg === 'object' && arg !== null) {
+          try {
+            return JSON.stringify(arg);
+          } catch (error) {
+            return '[Circular Object]';
+          }
+        } else {
+          return String(arg);
+        }
+      })
+      .join(' ');
+  }
+
+  console.log = function(...args) {
+    const logString = stringifyArgs(args);
+    window.parent.postMessage({ type: 'log', message: logString }, '*');
+    originalConsoleLog.apply(console, args);
+  };
+
+  console.error = function(...args) {
+    let errorData;
+    if (args.length > 0 && args[0] instanceof Error) {
+      const err = args[0];
+      // If the first arg is an Error, capture its details.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        ...getErrorObject(err),
+        rawArgsString: stringifyArgs(args.slice(1)),
+        timestamp: new Date().toISOString(),
+      };
+    } else {
+      // If not an Error object, treat all args as a general error message.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        message: stringifyArgs(args),
+        name: 'ConsoleLoggedError',
+        stack: null,
+        timestamp: new Date().toISOString(),
+      };
+    }
+    window.parent.postMessage(errorData, '*');
+    originalConsoleError.apply(console, args);
+  };
+
+  // Listen for global unhandled synchronous errors.
+  window.addEventListener('error', function(event) {
+    const errorDetails = event.error ? getErrorObject(event.error) : {
+      message: event.message,
+      name: 'GlobalError',
+      stack: null,
+      filename: event.filename,
+      lineno: event.lineno,
+      colno: event.colno,
+    };
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'global',
+      ...errorDetails,
+      message: errorDetails.message || event.message,
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+  // Listen for unhandled promise rejections (asynchronous errors).
+  window.addEventListener('unhandledrejection', function(event) {
+    const errorDetails = getErrorObject(event.reason);
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'unhandledrejection',
+      ...errorDetails,
+      message: errorDetails.message || 'Unhandled Promise Rejection',
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+})();</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>Pocket Boss Arcade - Offline Edition</title>
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --bg-panel: rgba(30, 41, 59, 0.92);
+            --accent: #38bdf8;
+            --accent-glow: rgba(56, 189, 248, 0.5);
+            --gold: #fbbf24;
+            --danger: #f43f5e;
+            --success: #22c55e;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--bg-dark);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: var(--text);
+            touch-action: none;
+        }
+
+        #app-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            max-width: 540px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            background: radial-gradient(circle at 50% 20%, #1e293b 0%, #090d16 100%);
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
+            overflow: hidden;
+        }
+
+        /* Top HUD */
+        #hud {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .hud-left, .hud-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            pointer-events: auto;
+        }
+
+        .score-pill {
+            background: rgba(15, 23, 42, 0.78);
+            border: 1.5px solid rgba(56, 189, 248, 0.4);
+            backdrop-filter: blur(6px);
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-weight: 800;
+            font-size: 1.1rem;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+        }
+
+        .combo-badge {
+            background: linear-gradient(135deg, #f59e0b, #ef4444);
+            color: #fff;
+            font-size: 0.78rem;
+            font-weight: 900;
+            padding: 2px 8px;
+            border-radius: 999px;
+            transform: scale(1);
+            transition: transform 0.15s ease;
+        }
+
+        .icon-btn {
+            background: rgba(15, 23, 42, 0.78);
+            border: 1.5px solid rgba(148, 163, 184, 0.35);
+            color: var(--text);
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: transform 0.12s ease, border-color 0.2s;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .icon-btn:active {
+            transform: scale(0.92);
+        }
+
+        /* Canvas */
+        #game-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* Overlay Screens */
+        .overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(9, 13, 22, 0.82);
+            backdrop-filter: blur(8px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 20;
+            transition: opacity 0.25s ease;
+        }
+
+        .overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .card {
+            width: 100%;
+            max-width: 400px;
+            background: var(--bg-panel);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 24px;
+            padding: 22px 20px;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+        }
+
+        /* Hero Avatar Preview */
+        .avatar-wrapper {
+            position: relative;
+            width: 104px;
+            height: 104px;
+            border-radius: 50%;
+            padding: 4px;
+            background: linear-gradient(135deg, #38bdf8, #a855f7, #fbbf24);
+            box-shadow: 0 0 25px var(--accent-glow);
+            cursor: pointer;
+        }
+
+        #avatar-preview-canvas {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: #1e293b;
+            display: block;
+        }
+
+        .avatar-edit-badge {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background: #0284c7;
+            color: white;
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 999px;
+            border: 2px solid #0f172a;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+        }
+
+        h1 {
+            font-size: 1.65rem;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+            background: linear-gradient(90deg, #38bdf8, #f8fafc, #fbbf24);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* Mode Selector Cards */
+        .mode-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            width: 100%;
+            margin-top: 4px;
+        }
+
+        .mode-btn {
+            background: rgba(15, 23, 42, 0.85);
+            border: 2px solid rgba(56, 189, 248, 0.35);
+            border-radius: 18px;
+            padding: 14px 10px;
+            color: var(--text);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            transition: transform 0.15s ease, border-color 0.2s, background 0.2s;
+        }
+
+        .mode-btn:hover, .mode-btn:active {
+            transform: translateY(-2px);
+            border-color: var(--accent);
+            background: rgba(30, 58, 138, 0.45);
+        }
+
+        .mode-emoji {
+            font-size: 1.9rem;
+        }
+
+        .mode-title {
+            font-weight: 800;
+            font-size: 0.98rem;
+        }
+
+        .mode-desc {
+            font-size: 0.73rem;
+            color: var(--text-muted);
+            line-height: 1.25;
+        }
+
+        .best-tag {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--gold);
+            background: rgba(251, 191, 36, 0.12);
+            padding: 2px 8px;
+            border-radius: 99px;
+            margin-top: 2px;
+        }
+
+        /* Action Buttons */
+        .btn-row {
+            display: flex;
+            gap: 8px;
+            width: 100%;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            flex: 1;
+            min-width: 135px;
+            padding: 11px 14px;
+            border-radius: 14px;
+            border: none;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: transform 0.12s ease, opacity 0.2s;
+        }
+
+        .btn:active {
+            transform: scale(0.96);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #0ea5e9, #2563eb);
+            color: white;
+            box-shadow: 0 6px 18px rgba(14, 165, 233, 0.35);
+        }
+
+        .btn-secondary {
+            background: rgba(51, 65, 85, 0.8);
+            color: #e2e8f0;
+            border: 1px solid rgba(148, 163, 184, 0.25);
+        }
+
+        .btn-gold {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: #fff;
+            box-shadow: 0 6px 18px rgba(245, 158, 11, 0.3);
+        }
+
+        /* Toast Banner */
+        #toast {
+            position: absolute;
+            bottom: 22px;
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid var(--accent);
+            color: var(--text);
+            padding: 10px 18px;
+            border-radius: 999px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            z-index: 40;
+            transition: transform 0.28s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+            pointer-events: none;
+            white-space: nowrap;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+        }
+
+        #toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .stats-box {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            background: rgba(15, 23, 42, 0.65);
+            padding: 12px;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .stat-label {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-val {
+            font-size: 1.35rem;
+            font-weight: 900;
+            color: var(--gold);
+        }
+    </style>
+</head>
+<body>
+
+<div id="app-container">
+    <!-- Top Gameplay HUD -->
+    <div id="hud" style="display: none;">
+        <div class="hud-left">
+            <div class="score-pill">
+                <span id="hud-score">0</span>
+                <span id="hud-combo" class="combo-badge" style="display: none;">x2</span>
+            </div>
+            <div id="hud-lives" style="font-size: 1.15rem; letter-spacing: 2px;"></div>
+        </div>
+        <div class="hud-right">
+            <button class="icon-btn" id="btn-sound" title="Toggle Sound" aria-label="Toggle Sound">🔊</button>
+            <button class="icon-btn" id="btn-pause" title="Pause Game" aria-label="Pause Game">⏸️</button>
+        </div>
+    </div>
+
+    <!-- Main Game Canvas -->
+    <canvas id="game-canvas" width="540" height="828"></canvas>
+
+    <!-- Title / Menu Overlay -->
+    <div id="menu-overlay" class="overlay">
+        <div class="card">
+            <div class="avatar-wrapper" id="avatar-trigger" title="Tap to change or embed photo">
+                <canvas id="avatar-preview-canvas" width="160" height="160"></canvas>
+                <span class="avatar-edit-badge">📷 Photo</span>
+            </div>
+            <input type="file" id="photo-input" accept="image/*" style="display:none;">
+
+            <div>
+                <h1>POCKET BOSS ARCADE</h1>
+                <p class="subtitle">100% Offline Mobile Game • Tap a mode below to play!</p>
+            </div>
+
+            <div class="mode-grid">
+                <button class="mode-btn" id="start-flappy">
+                    <span class="mode-emoji">🚀</span>
+                    <span class="mode-title">Sky Hopper</span>
+                    <span class="mode-desc">Tap to boost across the city skyline &amp; grab fruit!</span>
+                    <span class="best-tag" id="best-flappy">Best: 0</span>
+                </button>
+
+                <button class="mode-btn" id="start-catcher">
+                    <span class="mode-emoji">🍉</span>
+                    <span class="mode-title">Snack Catcher</span>
+                    <span class="mode-desc">Slide left &amp; right to catch treats &amp; dodge bombs!</span>
+                    <span class="best-tag" id="best-catcher">Best: 0</span>
+                </button>
+            </div>
+
+            <div class="btn-row" style="margin-top: 4px;">
+                <button class="btn btn-secondary" id="btn-upload-photo">🖼️ Set Photo</button>
+                <button class="btn btn-gold" id="btn-save-offline">📲 Save Offline HTML</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pause / Game Over Overlay -->
+    <div id="gameover-overlay" class="overlay hidden">
+        <div class="card">
+            <h1 id="over-title">GAME OVER</h1>
+            <p class="subtitle" id="over-subtitle">Great run out there in the city!</p>
+
+            <div class="stats-box">
+                <div class="stat-item">
+                    <span class="stat-label">Score</span>
+                    <span class="stat-val" id="over-score">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Best Score</span>
+                    <span class="stat-val" id="over-best">0</span>
+                </div>
+            </div>
+
+            <div class="btn-row">
+                <button class="btn btn-primary" id="btn-retry">🔄 Play Again</button>
+                <button class="btn btn-secondary" id="btn-home">🏠 Main Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast">Saved!</div>
+</div>
+
+<script>
+    // =========================================================================
+    // 1. EMBEDDED / UPLOADED AVATAR MANAGER
+    // =========================================================================
+    // Default path uses the uploaded image_8bf577.jpg, or an embedded Base64 data URL
+    // when the user clicks "Save Offline HTML".
+    window.EMBEDDED_AVATAR_DATA = null; 
+
+    const avatarImg = new Image();
+    let avatarLoaded = false;
+
+    function initAvatar() {
+        const savedCustom = localStorage.getItem('pocket_boss_custom_avatar');
+        if (window.EMBEDDED_AVATAR_DATA) {
+            avatarImg.src = window.EMBEDDED_AVATAR_DATA;
+        } else if (savedCustom) {
+            avatarImg.src = savedCustom;
+        } else {
+            avatarImg.src = 'image_8bf577.jpg';
+        }
+    }
+
+    avatarImg.onload = () => {
+        avatarLoaded = true;
+        renderAvatarPreview();
+    };
+
+    avatarImg.onerror = () => {
+        avatarLoaded = false;
+        renderAvatarPreview();
+    };
+
+    /**
+     * Draws the player avatar inside a circular frame at (cx, cy) with radius r.
+     * Uses `image_8bf577.jpg` if loaded, or draws a faithful stylized caricature
+     * of the bald hero with rectangular glasses & black jacket if offline without image.
+     */
+    function drawPlayerAvatar(ctx, cx, cy, r, tiltAngle = 0, expression = 'normal') {
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(tiltAngle);
+
+        // Outer neon ring glow
+        ctx.beginPath();
+        ctx.arc(0, 0, r + 3, 0, Math.PI * 2);
+        ctx.fillStyle = '#38bdf8';
+        ctx.fill();
+
+        // Clip circle
+        ctx.beginPath();
+        ctx.arc(0, 0, r, 0, Math.PI * 2);
+        ctx.closePath();
+        ctx.clip();
+
+        if (avatarLoaded && avatarImg.complete && avatarImg.naturalWidth > 0) {
+            // Center-crop image into square
+            const sw = avatarImg.naturalWidth;
+            const sh = avatarImg.naturalHeight;
+            const side = Math.min(sw, sh);
+            const sx = (sw - side) / 2;
+            const sy = (sh - side) / 2;
+            ctx.drawImage(avatarImg, sx, sy, side, side, -r, -r, r * 2, r * 2);
+        } else {
+            // Stylized Vector Fallback matching the uploaded photo:
+            // Bald head, strong dark eyebrows, rectangular dark-frame glasses, black collar jacket
+            ctx.fillStyle = '#1e293b';
+            ctx.fillRect(-r, -r, r * 2, r * 2);
+
+            // Black jacket shoulders
+            ctx.fillStyle = '#111827';
+            ctx.beginPath();
+            ctx.ellipse(0, r * 0.85, r * 0.85, r * 0.45, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Head / skin tone
+            const skinGrad = ctx.createRadialGradient(-r * 0.15, -r * 0.25, r * 0.1, 0, 0, r * 0.85);
+            skinGrad.addColorStop(0, '#f3c6a5');
+            skinGrad.addColorStop(1, '#d99b72');
+            ctx.fillStyle = skinGrad;
+            ctx.beginPath();
+            ctx.ellipse(0, r * 0.04, r * 0.72, r * 0.82, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Forehead shine
+            ctx.fillStyle = 'rgba(255,255,255,0.22)';
+            ctx.beginPath();
+            ctx.ellipse(-r * 0.18, -r * 0.45, r * 0.25, r * 0.12, -0.2, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Thick dark eyebrows
+            ctx.strokeStyle = '#1f2937';
+            ctx.lineWidth = Math.max(3, r * 0.11);
+            ctx.lineCap = 'round';
+            // Left brow
+            ctx.beginPath();
+            ctx.moveTo(-r * 0.46, -r * 0.18);
+            ctx.quadraticCurveTo(-r * 0.26, -r * 0.28, -r * 0.1, -r * 0.17);
+            ctx.stroke();
+            // Right brow
+            ctx.beginPath();
+            ctx.moveTo(r * 0.1, -r * 0.17);
+            ctx.quadraticCurveTo(r * 0.26, -r * 0.28, r * 0.46, -r * 0.18);
+            ctx.stroke();
+
+            // Eyes
+            ctx.fillStyle = '#111827';
+            const eyeY = -r * 0.02;
+            ctx.beginPath();
+            ctx.arc(-r * 0.27, eyeY, r * 0.085, 0, Math.PI * 2);
+            ctx.arc(r * 0.27, eyeY, r * 0.085, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Eye catchlights
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(-r * 0.29, eyeY - r * 0.025, r * 0.028, 0, Math.PI * 2);
+            ctx.arc(r * 0.25, eyeY - r * 0.025, r * 0.028, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Rectangular Wireframe Glasses
+            ctx.strokeStyle = '#0f172a';
+            ctx.lineWidth = Math.max(2, r * 0.065);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
+            // Left lens
+            ctx.beginPath();
+            ctx.roundRect(-r * 0.54, -r * 0.14, r * 0.46, r * 0.26, r * 0.05);
+            ctx.fill();
+            ctx.stroke();
+            // Right lens
+            ctx.beginPath();
+            ctx.roundRect(r * 0.08, -r * 0.14, r * 0.46, r * 0.26, r * 0.05);
+            ctx.fill();
+            ctx.stroke();
+            // Bridge
+            ctx.beginPath();
+            ctx.moveTo(-r * 0.08, -r * 0.06);
+            ctx.lineTo(r * 0.08, -r * 0.06);
+            ctx.stroke();
+
+            // Nose
+            ctx.strokeStyle = '#b4754e';
+            ctx.lineWidth = Math.max(2, r * 0.05);
+            ctx.beginPath();
+            ctx.arc(0, r * 0.18, r * 0.09, 0.2, Math.PI - 0.2);
+            ctx.stroke();
+
+            // Mouth
+            ctx.strokeStyle = '#8c4f32';
+            ctx.lineWidth = Math.max(2, r * 0.06);
+            ctx.beginPath();
+            if (expression === 'happy') {
+                ctx.arc(0, r * 0.36, r * 0.16, 0.15, Math.PI - 0.15);
+            } else {
+                ctx.moveTo(-r * 0.16, r * 0.42);
+                ctx.quadraticCurveTo(0, r * 0.40, r * 0.16, r * 0.42);
+            }
+            ctx.stroke();
+        }
+
+        // Subtle inner border ring
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.65)';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.arc(0, 0, r - 1, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.restore();
+    }
+
+    function renderAvatarPreview() {
+        const pCanvas = document.getElementById('avatar-preview-canvas');
+        if (!pCanvas) return;
+        const pCtx = pCanvas.getContext('2d');
+        pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
+        drawPlayerAvatar(pCtx, 80, 80, 74, 0, 'happy');
+    }
+
+    // =========================================================================
+    // 2. SYNTHESIZED WEB AUDIO SOUND ENGINE (Zero External Audio Files)
+    // =========================================================================
+    class SoundFX {
+        constructor() {
+            this.ctx = null;
+            this.enabled = true;
+        }
+
+        init() {
+            if (!this.ctx) {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (AudioCtx) this.ctx = new AudioCtx();
+            }
+            if (this.ctx && this.ctx.state === 'suspended') {
+                this.ctx.resume();
+            }
+        }
+
+        beep(freq = 440, duration = 0.1, type = 'sine', slideFreq = null, gainVal = 0.12) {
+            if (!this.enabled) return;
+            try {
+                this.init();
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, now);
+                if (slideFreq) {
+                    osc.frequency.exponentialRampToValueAtTime(slideFreq, now + duration);
+                }
+                gain.gain.setValueAtTime(gainVal, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + duration);
+            } catch (e) {
+                // Ignore audio context locks
+            }
+        }
+
+        jump() {
+            this.beep(280, 0.13, 'triangle', 560, 0.14);
+        }
+
+        collect(combo = 1) {
+            const base = 520 + Math.min(combo * 55, 600);
+            this.beep(base, 0.09, 'sine', base * 1.35, 0.15);
+        }
+
+        hit() {
+            this.beep(160, 0.25, 'sawtooth', 55, 0.2);
+        }
+    }
+
+    const sfx = new SoundFX();
+
+    // =========================================================================
+    // 3. GAME STATE & ENGINE SETUP
+    // =========================================================================
+    const canvas = document.getElementById('game-canvas');
+    const ctx = canvas.getContext('2d');
+
+    let W = 360;
+    let H = 640;
+
+    function resizeCanvas() {
+        const container = document.getElementById('app-container');
+        const rect = container.getBoundingClientRect();
+        W = rect.width;
+        H = rect.height;
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        canvas.width = W * dpr;
+        canvas.height = H * dpr;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    const state = {
+        screen: 'menu', // 'menu', 'playing', 'paused', 'gameover'
+        mode: 'flappy', // 'flappy' or 'catcher'
+        score: 0,
+        combo: 0,
+        lives: 3,
+        bestFlappy: parseInt(localStorage.getItem('pocket_boss_best_flappy') || '0', 10),
+        bestCatcher: parseInt(localStorage.getItem('pocket_boss_best_catcher') || '0', 10),
+        player: {
+            x: 100,
+            y: 250,
+            vx: 0,
+            vy: 0,
+            r: 28,
+            tilt: 0,
+            targetX: 180,
+            happyTimer: 0,
+            invulnTimer: 0
+        },
+        obstacles: [],
+        items: [],
+        particles: [],
+        floatingTexts: [],
+        bgBuildings: [],
+        clouds: [],
+        spawnTimer: 0,
+        itemTimer: 0,
+        elapsed: 0
+    };
+
+    function updateBestScoreBadges() {
+        document.getElementById('best-flappy').textContent = `Best: ${state.bestFlappy}`;
+        document.getElementById('best-catcher').textContent = `Best: ${state.bestCatcher}`;
+    }
+
+    // Initialize parallax city background matching the urban vibe of the photo
+    function initBackground() {
+        state.bgBuildings = [];
+        const count = 10;
+        for (let i = 0; i < count; i++) {
+            state.bgBuildings.push({
+                x: i * (W / 6),
+                w: 55 + Math.random() * 45,
+                h: 110 + Math.random() * 180,
+                color: i % 2 === 0 ? '#1e293b' : '#172033',
+                windows: Math.floor(3 + Math.random() * 4)
+            });
+        }
+        state.clouds = [];
+        for (let i = 0; i < 5; i++) {
+            state.clouds.push({
+                x: Math.random() * W,
+                y: 50 + Math.random() * (H * 0.35),
+                scale: 0.6 + Math.random() * 0.7,
+                speed: 12 + Math.random() * 18
+            });
+        }
+    }
+
+    initBackground();
+    initAvatar();
+    updateBestScoreBadges();
+
+    // =========================================================================
+    // 4. GAMEPLAY INITIALIZATION & MODES
+    // =========================================================================
+    const GOOD_TREATS = [
+        { emoji: '🐉', label: 'Dragon Fruit', pts: 15, color: '#ec4899' },
+        { emoji: '🫐', label: 'Blueberries', pts: 10, color: '#60a5fa' },
+        { emoji: '🍵', label: 'Green Tea', pts: 12, color: '#4ade80' },
+        { emoji: '🍲', label: 'Hot Pot', pts: 20, color: '#fb923c' },
+        { emoji: '🍈', label: 'Papaya', pts: 15, color: '#facc15' }
+    ];
+
+    const BAD_HAZARDS = [
+        { emoji: '💣', label: 'Bomb' },
+        { emoji: '⏰', label: '6AM Alarm' },
+        { emoji: '⚡', label: 'Zap' }
+    ];
+
+    function startGame(mode) {
+        sfx.init();
+        state.mode = mode;
+        state.screen = 'playing';
+        state.score = 0;
+        state.combo = 0;
+        state.obstacles = [];
+        state.items = [];
+        state.particles = [];
+        state.floatingTexts = [];
+        state.spawnTimer = 0;
+        state.itemTimer = 0;
+        state.elapsed = 0;
+
+        if (mode === 'flappy') {
+            state.lives = 1;
+            state.player.r = Math.min(28, W * 0.075);
+            state.player.x = W * 0.26;
+            state.player.y = H * 0.42;
+            state.player.vy = -260;
+            state.player.tilt = 0;
+            state.player.invulnTimer = 0;
+        } else {
+            state.lives = 3;
+            state.player.r = Math.min(34, W * 0.09);
+            state.player.x = W * 0.5;
+            state.player.targetX = W * 0.5;
+            state.player.y = H - 85;
+            state.player.vy = 0;
+            state.player.tilt = 0;
+            state.player.invulnTimer = 0;
+        }
+
+        document.getElementById('menu-overlay').classList.add('hidden');
+        document.getElementById('gameover-overlay').classList.add('hidden');
+        document.getElementById('hud').style.display = 'flex';
+        updateHUD();
+    }
+
+    function updateHUD() {
+        document.getElementById('hud-score').textContent = state.score;
+        const comboEl = document.getElementById('hud-combo');
+        if (state.combo >= 2) {
+            comboEl.style.display = 'inline-block';
+            comboEl.textContent = `x${Math.min(5, Math.floor(state.combo / 2) + 1)}`;
+        } else {
+            comboEl.style.display = 'none';
+        }
+
+        const livesEl = document.getElementById('hud-lives');
+        if (state.mode === 'catcher') {
+            livesEl.textContent = '❤️'.repeat(Math.max(0, state.lives));
+        } else {
+            livesEl.textContent = '';
+        }
+    }
+
+    function triggerGameOver() {
+        sfx.hit();
+        state.screen = 'gameover';
+        if (state.mode === 'flappy') {
+            if (state.score > state.bestFlappy) {
+                state.bestFlappy = state.score;
+                localStorage.setItem('pocket_boss_best_flappy', String(state.bestFlappy));
+            }
+            document.getElementById('over-best').textContent = state.bestFlappy;
+        } else {
+            if (state.score > state.bestCatcher) {
+                state.bestCatcher = state.score;
+                localStorage.setItem('pocket_boss_best_catcher', String(state.bestCatcher));
+            }
+            document.getElementById('over-best').textContent = state.bestCatcher;
+        }
+
+        updateBestScoreBadges();
+        document.getElementById('over-title').textContent = 'GAME OVER';
+        document.getElementById('over-subtitle').textContent =
+            state.mode === 'flappy' ? 'Sky Hopper Run Complete!' : 'Snack Catcher Run Complete!';
+        document.getElementById('over-score').textContent = state.score;
+        document.getElementById('gameover-overlay').classList.remove('hidden');
+    }
+
+    function spawnParticles(x, y, color, count = 12) {
+        for (let i = 0; i < count; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const speed = 50 + Math.random() * 170;
+            state.particles.push({
+                x,
+                y,
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed,
+                r: 3 + Math.random() * 4,
+                color,
+                alpha: 1,
+                life: 0.45 + Math.random() * 0.3
+            });
+        }
+    }
+
+    function addFloatingText(x, y, text, color = '#fbbf24') {
+        state.floatingTexts.push({
+            x,
+            y,
+            text,
+            color,
+            alpha: 1,
+            vy: -55
+        });
+    }
+
+    // =========================================================================
+    // 5. UPDATE LOOP (FLAPPY SKY HOPPER & SNACK CATCHER)
+    // =========================================================================
+    function updateGame(dt) {
+        state.elapsed += dt;
+        const p = state.player;
+        if (p.happyTimer > 0) p.happyTimer -= dt;
+        if (p.invulnTimer > 0) p.invulnTimer -= dt;
+
+        // Move clouds
+        for (const c of state.clouds) {
+            c.x -= c.speed * dt;
+            if (c.x < -80) c.x = W + 80;
+        }
+
+        // Scroll background skyline
+        const bgSpeed = state.mode === 'flappy' ? 45 : 15;
+        for (const b of state.bgBuildings) {
+            b.x -= bgSpeed * dt;
+            if (b.x + b.w < 0) {
+                b.x = W + Math.random() * 40;
+                b.h = 110 + Math.random() * 180;
+            }
+        }
+
+        if (state.mode === 'flappy') {
+            updateFlappy(dt);
+        } else {
+            updateCatcher(dt);
+        }
+
+        // Update particles
+        for (let i = state.particles.length - 1; i >= 0; i--) {
+            const pt = state.particles[i];
+            pt.x += pt.vx * dt;
+            pt.y += pt.vy * dt;
+            pt.vy += 240 * dt;
+            pt.life -= dt;
+            pt.alpha = Math.max(0, pt.life * 2);
+            if (pt.life <= 0) state.particles.splice(i, 1);
+        }
+
+        // Update floating score texts
+        for (let i = state.floatingTexts.length - 1; i >= 0; i--) {
+            const ft = state.floatingTexts[i];
+            ft.y += ft.vy * dt;
+            ft.alpha -= dt * 1.4;
+            if (ft.alpha <= 0) state.floatingTexts.splice(i, 1);
+        }
+    }
+
+    function updateFlappy(dt) {
+        const p = state.player;
+        const gravity = 860;
+        p.vy += gravity * dt;
+        p.y += p.vy * dt;
+        p.tilt = Math.max(-0.45, Math.min(0.65, p.vy / 480));
+
+        // Floor or ceiling collision
+        if (p.y + p.r > H - 24 || p.y - p.r < 0) {
+            spawnParticles(p.x, p.y, '#f43f5e', 20);
+            triggerGameOver();
+            return;
+        }
+
+        // Spawn skyscraper pipes + collectible snacks
+        state.spawnTimer -= dt;
+        const speed = Math.min(260, 165 + state.score * 0.45);
+        if (state.spawnTimer <= 0) {
+            state.spawnTimer = Math.max(1.25, 1.95 - state.score * 0.004);
+            const gap = Math.max(138, 175 - state.score * 0.12);
+            const minTop = 70;
+            const maxTop = H - gap - 110;
+            const topH = minTop + Math.random() * Math.max(40, maxTop - minTop);
+
+            state.obstacles.push({
+                x: W + 30,
+                w: 58,
+                topH,
+                bottomY: topH + gap,
+                passed: false
+            });
+
+            // Spawn a yummy treat inside the gap or after it
+            const treat = GOOD_TREATS[Math.floor(Math.random() * GOOD_TREATS.length)];
+            state.items.push({
+                x: W + 59,
+                y: topH + gap / 2,
+                r: 20,
+                ...treat,
+                isHazard: false
+            });
+        }
+
+        // Update obstacles
+        for (let i = state.obstacles.length - 1; i >= 0; i--) {
+            const ob = state.obstacles[i];
+            ob.x -= speed * dt;
+
+            // Score when passing obstacle
+            if (!ob.passed && ob.x + ob.w < p.x) {
+                ob.passed = true;
+                state.score += 5;
+                updateHUD();
+            }
+
+            // Circle-rectangle collision check
+            const hitX = p.x + p.r * 0.8 > ob.x && p.x - p.r * 0.8 < ob.x + ob.w;
+            const hitY = p.y - p.r * 0.8 < ob.topH || p.y + p.r * 0.8 > ob.bottomY;
+            if (hitX && hitY) {
+                spawnParticles(p.x, p.y, '#f43f5e', 22);
+                triggerGameOver();
+                return;
+            }
+
+            if (ob.x + ob.w < -40) {
+                state.obstacles.splice(i, 1);
+            }
+        }
+
+        // Update treats
+        for (let i = state.items.length - 1; i >= 0; i--) {
+            const it = state.items[i];
+            it.x -= speed * dt;
+
+            const dx = p.x - it.x;
+            const dy = p.y - it.y;
+            if (Math.hypot(dx, dy) < p.r + it.r) {
+                state.combo++;
+                const mult = Math.min(5, Math.floor(state.combo / 2) + 1);
+                const gained = it.pts * mult;
+                state.score += gained;
+                p.happyTimer = 0.45;
+                sfx.collect(state.combo);
+                spawnParticles(it.x, it.y, it.color, 14);
+                addFloatingText(it.x, it.y - 10, `+${gained}`, it.color);
+                updateHUD();
+                state.items.splice(i, 1);
+                continue;
+            }
+
+            if (it.x < -40) state.items.splice(i, 1);
+        }
+    }
+
+    function updateCatcher(dt) {
+        const p = state.player;
+        p.y = H - 85;
+        // Smoothly glide toward targetX
+        const diff = p.targetX - p.x;
+        p.x += diff * Math.min(1, dt * 16);
+        p.x = Math.max(p.r + 8, Math.min(W - p.r - 8, p.x));
+        p.tilt = Math.max(-0.35, Math.min(0.35, diff * 0.004));
+
+        // Spawn falling items
+        state.itemTimer -= dt;
+        if (state.itemTimer <= 0) {
+            const difficulty = Math.min(1, state.elapsed / 75);
+            state.itemTimer = Math.max(0.28, 0.68 - difficulty * 0.34);
+
+            const isHazard = Math.random() < (0.24 + difficulty * 0.16);
+            const margin = 34;
+            const x = margin + Math.random() * (W - margin * 2);
+            const fallSpeed = 165 + Math.random() * 110 + difficulty * 130;
+
+            if (isHazard) {
+                const haz = BAD_HAZARDS[Math.floor(Math.random() * BAD_HAZARDS.length)];
+                state.items.push({
+                    x,
+                    y: -30,
+                    vy: fallSpeed,
+                    r: 22,
+                    emoji: haz.emoji,
+                    color: '#f43f5e',
+                    isHazard: true,
+                    rot: 0,
+                    vRot: (Math.random() - 0.5) * 4
+                });
+            } else {
+                const treat = GOOD_TREATS[Math.floor(Math.random() * GOOD_TREATS.length)];
+                state.items.push({
+                    x,
+                    y: -30,
+                    vy: fallSpeed,
+                    r: 22,
+                    ...treat,
+                    isHazard: false,
+                    rot: 0,
+                    vRot: (Math.random() - 0.5) * 3
+                });
+            }
+        }
+
+        // Update falling items
+        for (let i = state.items.length - 1; i >= 0; i--) {
+            const it = state.items[i];
+            it.y += it.vy * dt;
+            it.rot += (it.vRot || 0) * dt;
+
+            const dx = p.x - it.x;
+            const dy = p.y - it.y;
+            if (Math.hypot(dx, dy) < p.r + it.r - 4) {
+                if (it.isHazard) {
+                    if (p.invulnTimer <= 0) {
+                        state.lives--;
+                        state.combo = 0;
+                        p.invulnTimer = 1.0;
+                        sfx.hit();
+                        spawnParticles(it.x, it.y, '#f43f5e', 20);
+                        addFloatingText(p.x, p.y - 30, 'OUCH! -1 ❤️', '#f43f5e');
+                        updateHUD();
+                        if (state.lives <= 0) {
+                            triggerGameOver();
+                            return;
+                        }
+                    }
+                } else {
+                    state.combo++;
+                    const mult = Math.min(5, Math.floor(state.combo / 2) + 1);
+                    const gained = it.pts * mult;
+                    state.score += gained;
+                    p.happyTimer = 0.4;
+                    sfx.collect(state.combo);
+                    spawnParticles(it.x, it.y, it.color, 14);
+                    addFloatingText(it.x, it.y - 12, `+${gained}`, it.color);
+                    updateHUD();
+                }
+                state.items.splice(i, 1);
+                continue;
+            }
+
+            // Missed item hits bottom
+            if (it.y - it.r > H) {
+                if (!it.isHazard) {
+                    state.combo = 0;
+                    updateHUD();
+                }
+                state.items.splice(i, 1);
+            }
+        }
+    }
+
+    // =========================================================================
+    // 6. RENDERING PIPELINE
+    // =========================================================================
+    function renderGame() {
+        ctx.clearRect(0, 0, W, H);
+
+        // Dusk Urban Sky Gradient (inspired by the outdoor city photo)
+        const skyGrad = ctx.createLinearGradient(0, 0, 0, H);
+        skyGrad.addColorStop(0, '#0f172a');
+        skyGrad.addColorStop(0.55, '#1e293b');
+        skyGrad.addColorStop(1, '#334155');
+        ctx.fillStyle = skyGrad;
+        ctx.fillRect(0, 0, W, H);
+
+        // Soft clouds
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+        for (const c of state.clouds) {
+            ctx.beginPath();
+            ctx.arc(c.x, c.y, 24 * c.scale, 0, Math.PI * 2);
+            ctx.arc(c.x + 18 * c.scale, c.y - 6 * c.scale, 18 * c.scale, 0, Math.PI * 2);
+            ctx.arc(c.x - 18 * c.scale, c.y + 4 * c.scale, 16 * c.scale, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // City Skyline Silhouette
+        for (const b of state.bgBuildings) {
+            const by = H - 24 - b.h;
+            ctx.fillStyle = b.color;
+            ctx.fillRect(b.x, by, b.w, b.h);
+
+            // Illuminated building windows
+            ctx.fillStyle = 'rgba(251, 191, 36, 0.22)';
+            const cols = 2;
+            const rows = b.windows;
+            const ww = 8;
+            const wh = 12;
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    ctx.fillRect(b.x + 12 + c * 20, by + 16 + r * 26, ww, wh);
+                }
+            }
+        }
+
+        // Ground strip
+        ctx.fillStyle = '#090d16';
+        ctx.fillRect(0, H - 24, W, 24);
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(0, H - 24);
+        ctx.lineTo(W, H - 24);
+        ctx.stroke();
+
+        // Draw Obstacles (Flappy Mode)
+        for (const ob of state.obstacles) {
+            const pipeGrad = ctx.createLinearGradient(ob.x, 0, ob.x + ob.w, 0);
+            pipeGrad.addColorStop(0, '#0284c7');
+            pipeGrad.addColorStop(0.5, '#38bdf8');
+            pipeGrad.addColorStop(1, '#0369a1');
+            ctx.fillStyle = pipeGrad;
+
+            // Top tower
+            ctx.beginPath();
+            ctx.roundRect(ob.x, -6, ob.w, ob.topH + 6, 10);
+            ctx.fill();
+
+            // Bottom tower
+            ctx.beginPath();
+            ctx.roundRect(ob.x, ob.bottomY, ob.w, H - 24 - ob.bottomY, 10);
+            ctx.fill();
+        }
+
+        // Draw Treats & Hazards
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        for (const it of state.items) {
+            ctx.save();
+            ctx.translate(it.x, it.y);
+            if (it.rot) ctx.rotate(it.rot);
+
+            // Glow halo behind item
+            ctx.beginPath();
+            ctx.arc(0, 0, it.r, 0, Math.PI * 2);
+            ctx.fillStyle = it.isHazard ? 'rgba(244, 63, 94, 0.28)' : 'rgba(56, 189, 248, 0.22)';
+            ctx.fill();
+
+            ctx.font = `${Math.round(it.r * 1.35)}px sans-serif`;
+            ctx.fillText(it.emoji, 0, 2);
+            ctx.restore();
+        }
+
+        // Draw Player Avatar
+        const p = state.player;
+        if (state.screen !== 'menu') {
+            ctx.save();
+            if (p.invulnTimer > 0 && Math.floor(p.invulnTimer * 12) % 2 === 0) {
+                ctx.globalAlpha = 0.5;
+            }
+            const expr = p.happyTimer > 0 ? 'happy' : 'normal';
+            drawPlayerAvatar(ctx, p.x, p.y, p.r, p.tilt, expr);
+            ctx.restore();
+
+            // Helper guide bar in Catcher mode
+            if (state.mode === 'catcher') {
+                ctx.fillStyle = 'rgba(56, 189, 248, 0.25)';
+                ctx.beginPath();
+                ctx.roundRect(p.x - 28, p.y + p.r + 8, 56, 5, 3);
+                ctx.fill();
+            }
+        }
+
+        // Draw Particles
+        for (const pt of state.particles) {
+            ctx.save();
+            ctx.globalAlpha = pt.alpha;
+            ctx.fillStyle = pt.color;
+            ctx.beginPath();
+            ctx.arc(pt.x, pt.y, pt.r, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+
+        // Draw Floating Score Texts
+        for (const ft of state.floatingTexts) {
+            ctx.save();
+            ctx.globalAlpha = Math.max(0, ft.alpha);
+            ctx.font = '900 18px sans-serif';
+            ctx.fillStyle = ft.color;
+            ctx.strokeStyle = '#0f172a';
+            ctx.lineWidth = 3;
+            ctx.strokeText(ft.text, ft.x, ft.y);
+            ctx.fillText(ft.text, ft.x, ft.y);
+            ctx.restore();
+        }
+    }
+
+    // Main Animation Loop
+    let lastTime = performance.now();
+    function loop(now) {
+        const dt = Math.min(0.05, (now - lastTime) / 1000);
+        lastTime = now;
+
+        if (state.screen === 'playing') {
+            updateGame(dt);
+        }
+        renderGame();
+        requestAnimationFrame(loop);
+    }
+    requestAnimationFrame(loop);
+
+    // =========================================================================
+    // 7. INPUT CONTROLS (TOUCH, MOUSE, KEYBOARD)
+    // =========================================================================
+    function handleBoostOrTap(clientX) {
+        if (state.screen !== 'playing') return;
+        const rect = canvas.getBoundingClientRect();
+        const relX = clientX - rect.left;
+
+        if (state.mode === 'flappy') {
+            state.player.vy = -310;
+            sfx.jump();
+            spawnParticles(state.player.x, state.player.y + state.player.r, '#38bdf8', 6);
+        } else {
+            state.player.targetX = relX;
+        }
+    }
+
+    function handleMove(clientX) {
+        if (state.screen !== 'playing' || state.mode !== 'catcher') return;
+        const rect = canvas.getBoundingClientRect();
+        state.player.targetX = clientX - rect.left;
+    }
+
+    canvas.addEventListener('pointerdown', (e) => {
+        handleBoostOrTap(e.clientX);
+    });
+
+    canvas.addEventListener('pointermove', (e) => {
+        if (e.buttons > 0 || e.pointerType === 'touch') {
+            handleMove(e.clientX);
+        }
+    });
+
+    window.addEventListener('keydown', (e) => {
+        if (state.screen !== 'playing') return;
+        if (state.mode === 'flappy' && (e.code === 'Space' || e.code === 'ArrowUp')) {
+            e.preventDefault();
+            state.player.vy = -310;
+            sfx.jump();
+            spawnParticles(state.player.x, state.player.y + state.player.r, '#38bdf8', 6);
+        } else if (state.mode === 'catcher') {
+            if (e.code === 'ArrowLeft' || e.code === 'KeyA') {
+                state.player.targetX -= 42;
+            } else if (e.code === 'ArrowRight' || e.code === 'KeyD') {
+                state.player.targetX += 42;
+            }
+        }
+    });
+
+    // =========================================================================
+    // 8. UI BUTTONS, PHOTO UPLOAD & OFFLINE SINGLE-FILE EXPORT
+    // =========================================================================
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 2600);
+    }
+
+    document.getElementById('start-flappy').addEventListener('click', () => startGame('flappy'));
+    document.getElementById('start-catcher').addEventListener('click', () => startGame('catcher'));
+
+    document.getElementById('btn-retry').addEventListener('click', () => startGame(state.mode));
+    document.getElementById('btn-home').addEventListener('click', () => {
+        state.screen = 'menu';
+        document.getElementById('hud').style.display = 'none';
+        document.getElementById('gameover-overlay').classList.add('hidden');
+        document.getElementById('menu-overlay').classList.remove('hidden');
+        renderAvatarPreview();
+    });
+
+    document.getElementById('btn-sound').addEventListener('click', (e) => {
+        sfx.enabled = !sfx.enabled;
+        e.currentTarget.textContent = sfx.enabled ? '🔊' : '🔇';
+        showToast(sfx.enabled ? 'Sound Effects ON' : 'Sound Effects Muted');
+    });
+
+    document.getElementById('btn-pause').addEventListener('click', () => {
+        if (state.screen === 'playing') {
+            state.screen = 'paused';
+            document.getElementById('over-title').textContent = 'GAME PAUSED';
+            document.getElementById('over-subtitle').textContent = 'Take a breather!';
+            document.getElementById('over-score').textContent = state.score;
+            document.getElementById('over-best').textContent =
+                state.mode === 'flappy' ? state.bestFlappy : state.bestCatcher;
+            document.getElementById('btn-retry').textContent = '▶️ Resume';
+            document.getElementById('gameover-overlay').classList.remove('hidden');
+        }
+    });
+
+    // Override Retry button behavior if paused
+    document.getElementById('btn-retry').addEventListener('click', (e) => {
+        if (state.screen === 'paused') {
+            e.stopImmediatePropagation();
+            state.screen = 'playing';
+            document.getElementById('btn-retry').textContent = '🔄 Play Again';
+            document.getElementById('gameover-overlay').classList.add('hidden');
+            lastTime = performance.now();
+        }
+    }, true);
+
+    // Photo Picker & Base64 Compressor (so users can embed their photo offline)
+    const photoInput = document.getElementById('photo-input');
+    document.getElementById('avatar-trigger').addEventListener('click', () => photoInput.click());
+    document.getElementById('btn-upload-photo').addEventListener('click', () => photoInput.click());
+
+    photoInput.addEventListener('change', (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            const tempImg = new Image();
+            tempImg.onload = () => {
+                // Compress & center-crop to 240x240 JPEG Data URL for fast offline storage
+                const offCanvas = document.createElement('canvas');
+                offCanvas.width = 240;
+                offCanvas.height = 240;
+                const oCtx = offCanvas.getContext('2d');
+                const side = Math.min(tempImg.width, tempImg.height);
+                const sx = (tempImg.width - side) / 2;
+                const sy = (tempImg.height - side) / 2;
+                oCtx.drawImage(tempImg, sx, sy, side, side, 0, 0, 240, 240);
+                const dataUrl = offCanvas.toDataURL('image/jpeg', 0.86);
+                try {
+                    localStorage.setItem('pocket_boss_custom_avatar', dataUrl);
+                } catch (err) {
+                    // Ignore quota errors
+                }
+                window.EMBEDDED_AVATAR_DATA = dataUrl;
+                avatarImg.src = dataUrl;
+                showToast('Character photo updated!');
+            };
+            tempImg.src = ev.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+
+    // Save Standalone Offline HTML File (with current avatar permanently embedded)
+    document.getElementById('btn-save-offline').addEventListener('click', () => {
+        let dataUrl = window.EMBEDDED_AVATAR_DATA || localStorage.getItem('pocket_boss_custom_avatar');
+
+        // If default image_8bf577.jpg is currently loaded, capture it into a Data URL automatically
+        if (!dataUrl && avatarLoaded && avatarImg.complete && avatarImg.naturalWidth > 0) {
+            try {
+                const offCanvas = document.createElement('canvas');
+                offCanvas.width = 240;
+                offCanvas.height = 240;
+                const oCtx = offCanvas.getContext('2d');
+                const side = Math.min(avatarImg.naturalWidth, avatarImg.naturalHeight);
+                const sx = (avatarImg.naturalWidth - side) / 2;
+                const sy = (avatarImg.naturalHeight - side) / 2;
+                oCtx.drawImage(avatarImg, sx, sy, side, side, 0, 0, 240, 240);
+                dataUrl = offCanvas.toDataURL('image/jpeg', 0.86);
+            } catch (e) {
+                // Cross-origin canvas taint fallback
+            }
+        }
+
+        let htmlSource = document.documentElement.outerHTML;
+        if (dataUrl) {
+            htmlSource = htmlSource.replace(
+                'window.EMBEDDED_AVATAR_DATA = null;',
+                `window.EMBEDDED_AVATAR_DATA = ${JSON.stringify(dataUrl)};`
+            );
+        }
+
+        const blob = new Blob(['<!DOCTYPE html>\n' + htmlSource], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'Pocket_Boss_Offline_Game.html';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast('Offline HTML game downloaded!');
+    });
+</script>
+
+</body></html>
